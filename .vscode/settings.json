@@ -7,5 +7,5 @@
   "[svelte]": {
     "editor.defaultFormatter": "svelte.svelte-vscode"
   },
-  "cSpell.ignoreWords": []
+  "cSpell.ignoreWords": ["logone"]
 }
