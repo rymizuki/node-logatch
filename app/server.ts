@@ -8,6 +8,7 @@ import { Server } from 'socket.io'
 import './recorder'
 import { store } from './server/store'
 import { load } from './server/configuration'
+import logone from '@logone/express'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const build = require(resolve(__dirname, './'))
@@ -15,6 +16,7 @@ const app = express()
 
 app.use(express.static(resolve(__dirname, '../public')))
 app.use(express.json())
+app.use(logone())
 
 app.post('/records', (req, res) => {
   store.push(req.body.content)
@@ -43,7 +45,6 @@ server.listen(PORT, HOST, () => {
 
 const io = new Server(server, { path: '/socket' })
 io.on('connection', () => {
-  console.debug('user connected')
   io.emit('connected')
 })
 

@@ -1,5 +1,15 @@
 import readline from 'readline'
+import { parseArgs } from 'util'
 import { load } from '~/server/configuration'
+
+const options = {
+  silent: {
+    type: 'boolean' as const,
+    short: 's',
+  },
+}
+const input = process.argv.slice(2)
+const { values: args } = parseArgs({ options, args: input })
 
 process.stdin.setEncoding('utf-8')
 
@@ -9,6 +19,10 @@ const start = () => {
     input: process.stdin,
   })
   reader.on('line', (line) => {
+    if (!args.silent) {
+      console.log(line)
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     fetch(`http://${config.host}:${config.port}/records`, {
       method: 'POST',
@@ -18,10 +32,6 @@ const start = () => {
       },
       body: JSON.stringify({ content: line }),
     })
-  })
-
-  reader.on('close', () => {
-    console.info('close')
   })
 }
 
