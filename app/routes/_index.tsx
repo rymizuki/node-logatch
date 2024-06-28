@@ -17,12 +17,21 @@ export default function IndexPage() {
     setShow({})
   }
 
-  const [filter, setFilter] = useState<{ type: { eq: string } }>({
+  const [filter, setFilter] = useState<{
+    type: { eq: string }
+    content: { contains: string }
+  }>({
     type: { eq: '' },
+    content: { contains: '' },
   })
   const handleSelectType = (ev: ChangeEvent<HTMLSelectElement>) => {
     const value = ev.target.value
     filter.type.eq = value
+    setFilter({ ...filter })
+  }
+  const handleChangeKeyword = (ev: ChangeEvent<HTMLInputElement>) => {
+    const value = ev.target.value
+    filter.content.contains = value
     setFilter({ ...filter })
   }
 
@@ -46,6 +55,17 @@ export default function IndexPage() {
           return false
         }
       }
+      if (filter.content.contains !== '') {
+        const fragments = filter.content.contains.split(' ')
+        if (fragments.length) {
+          const matched = fragments.filter((fragment) =>
+            row.content.includes(fragment),
+          )
+          if (matched.length !== fragments.length) {
+            return false
+          }
+        }
+      }
       return true
     })
   }
@@ -64,6 +84,14 @@ export default function IndexPage() {
                 <option value="json">JSON</option>
                 <option value="text">TEXT</option>
               </select>
+            </FlexItem>
+            <FlexItem>
+              <input
+                type="text"
+                name="contents"
+                defaultValue={filter.content.contains}
+                onChange={handleChangeKeyword}
+              />
             </FlexItem>
             <FlexItem>
               <button type="button" onClick={handleClickClose}>
