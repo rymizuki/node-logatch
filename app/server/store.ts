@@ -2,6 +2,7 @@ import { cdate } from 'cdate'
 import EventEmitter from 'events'
 import crypto from 'crypto'
 import ansicolor, { AnsiColored } from 'ansicolor'
+import { logger } from './logger'
 
 export type LogRecord = {
   id: string
@@ -33,11 +34,22 @@ class Store extends EventEmitter {
 function parseJSON(value: string) {
   const match = value.match(new RegExp(/\{(.+)\}$/))
   if (match) {
+    const content = match[0]
     try {
-      const content = match[0]
       return JSON.parse(content)
     } catch (error) {
-      console.warn(error)
+      if (error instanceof Error) {
+        logger('server').warning(error.message, {
+          error: {
+            message: error.message,
+            stack: error.stack,
+          },
+          content,
+          source: value,
+        })
+      } else {
+        logger('server').warning(error as string)
+      }
       return
     }
   }
