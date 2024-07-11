@@ -4,10 +4,37 @@ import { ChangeEvent, MouseEvent, useMemo, useState } from 'react'
 import { Flex, FlexItem } from '~/components/flex'
 import { parseCSS } from '~/helpers/parse-css'
 import { useRecordSocketStore } from '~/store/record-socket'
+import qs from 'qs'
 
+function useQueryParams<T = Record<string, unknown>>() {
+  const [urlSearchParams, updateUrlSearchParams] = useSearchParams()
+  const params = useMemo(() => {
+    return qs.parse('?' + urlSearchParams.toString()) as T
+  }, [urlSearchParams])
+  const update = (input: Record<string, unknown>) => {
+    const queryString = qs.stringify(input)
+    const queries = queryString.split(/&/)
+    updateUrlSearchParams((prev) => {
+      for (let index = 0; index < queries.length; index++) {
+        const query = queries[index]
+        const [key, value] = query.split('=')
+        prev.set(decodeURIComponent(key), value)
+      }
+      return prev
+    })
+  }
+
+  return {
+    params,
+    update,
+  }
+}
 
 export default function IndexPage() {
   const { records, clear } = useRecordSocketStore()
+  const query = useQueryParams<{
+    filter?: { type?: { eq?: string }; content?: { contains?: string } }
+  }>()
 
   const [shown, setShow] = useState<Record<string, boolean>>({})
   const handleClick = (record: (typeof records)[number]) => {
@@ -22,18 +49,20 @@ export default function IndexPage() {
     type: { eq: string }
     content: { contains: string }
   }>({
-    type: { eq: '' },
-    content: { contains: '' },
+    type: { eq: query.params?.filter?.type?.eq ?? '' },
+    content: { contains: query.params?.filter?.content?.contains ?? '' },
   })
   const handleSelectType = (ev: ChangeEvent<HTMLSelectElement>) => {
     const value = ev.target.value
     filter.type.eq = value
     setFilter({ ...filter })
+    query.update({ filter })
   }
   const handleChangeKeyword = (ev: ChangeEvent<HTMLInputElement>) => {
     const value = ev.target.value
     filter.content.contains = value
     setFilter({ ...filter })
+    query.update({ filter })
   }
 
   const handleDoubleClick = (ev: MouseEvent<HTMLPreElement>) => {
