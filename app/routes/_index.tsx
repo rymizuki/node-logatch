@@ -1,12 +1,13 @@
-import { Form } from '@remix-run/react'
+import { Form, useSearchParams } from '@remix-run/react'
 import { css, sva } from '@styled-system/css/index.mjs'
-import { ChangeEvent, MouseEvent, useState } from 'react'
+import { ChangeEvent, MouseEvent, useMemo, useState } from 'react'
 import { Flex, FlexItem } from '~/components/flex'
 import { parseCSS } from '~/helpers/parse-css'
 import { useRecordSocketStore } from '~/store/record-socket'
 
+
 export default function IndexPage() {
-  const { records } = useRecordSocketStore()
+  const { records, clear } = useRecordSocketStore()
 
   const [shown, setShow] = useState<Record<string, boolean>>({})
   const handleClick = (record: (typeof records)[number]) => {
@@ -48,6 +49,10 @@ export default function IndexPage() {
     selection.addRange(range)
   }
 
+  const handleClickClear = () => {
+    clear()
+  }
+
   const narrow = (rows: typeof records) => {
     return rows.filter((row) => {
       if (filter.type.eq !== '') {
@@ -73,7 +78,7 @@ export default function IndexPage() {
   const c = style()
   return (
     <div className={c.root}>
-      <h1>hello</h1>
+      <h1>LOGATCH</h1>
 
       <div>
         <Form>
@@ -96,6 +101,11 @@ export default function IndexPage() {
             <FlexItem>
               <button type="button" onClick={handleClickClose}>
                 すべて閉じる
+              </button>
+            </FlexItem>
+            <FlexItem>
+              <button type="button" onClick={handleClickClear}>
+                ログをクリア
               </button>
             </FlexItem>
           </Flex>

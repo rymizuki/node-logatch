@@ -17,6 +17,11 @@ export function useRecordSocketStore() {
     __emit()
   }
 
+  function clear() {
+    __records = []
+    __emit()
+  }
+
   function __emit() {
     listeners.forEach((listener) => listener())
   }
@@ -47,5 +52,5 @@ export function useRecordSocketStore() {
       return __records
     },
   )
-  return { records }
+  return { records, clear }
 }
