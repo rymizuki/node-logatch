@@ -6,7 +6,14 @@ module.exports = {
   // 利用するパッケージは、SSRのバンドルに含めるためにトランスパイルする
   serverModuleFormat: 'cjs',
   serverDependenciesToBundle: ['./styled-system/**/*'],
-  feature: {},
+  feature: {
+    v2_dev: {
+      port: 18086,
+    },
+  },
+  dev: {
+    port: 18086,
+  },
   postcss: true,
   browserNodeBuiltinsPolyfill: {},
 }
