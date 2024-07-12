@@ -1,6 +1,7 @@
 @layer base {
   html,
   body {
+    height: 100%;
     font-size: 16px;
     letter-spacing: 0.15rem;
     font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN',

@@ -1,40 +1,26 @@
-import { Form, useSearchParams } from '@remix-run/react'
 import { css, sva } from '@styled-system/css/index.mjs'
-import { ChangeEvent, MouseEvent, useMemo, useState } from 'react'
+import { MouseEvent, useMemo, useState } from 'react'
 import { Flex, FlexItem } from '~/components/flex'
+import { FilterForm } from '~/components/organisms/filter-form'
 import { parseCSS } from '~/helpers/parse-css'
+import { useQueryParams } from '~/hooks/use-query-params'
+import { FilterPort } from '~/interfaces'
 import { useRecordSocketStore } from '~/store/record-socket'
-import qs from 'qs'
-
-function useQueryParams<T = Record<string, unknown>>() {
-  const [urlSearchParams, updateUrlSearchParams] = useSearchParams()
-  const params = useMemo(() => {
-    return qs.parse('?' + urlSearchParams.toString()) as T
-  }, [urlSearchParams])
-  const update = (input: Record<string, unknown>) => {
-    const queryString = qs.stringify(input)
-    const queries = queryString.split(/&/)
-    updateUrlSearchParams((prev) => {
-      for (let index = 0; index < queries.length; index++) {
-        const query = queries[index]
-        const [key, value] = query.split('=')
-        prev.set(decodeURIComponent(key), value)
-      }
-      return prev
-    })
-  }
-
-  return {
-    params,
-    update,
-  }
-}
 
 export default function IndexPage() {
   const { records, clear } = useRecordSocketStore()
   const query = useQueryParams<{
     filter?: { type?: { eq?: string }; content?: { contains?: string } }
   }>()
+  const filter = useMemo(() => {
+    return {
+      type: { eq: query.params?.filter?.type?.eq ?? '' },
+      content: { contains: query.params?.filter?.content?.contains ?? '' },
+    }
+  }, [query])
+  const handleChangeFilter = (filter: FilterPort) => {
+    query.update({ filter })
+  }
 
   const [shown, setShow] = useState<Record<string, boolean>>({})
   const handleClick = (record: (typeof records)[number]) => {
@@ -43,26 +29,6 @@ export default function IndexPage() {
   }
   const handleClickClose = () => {
     setShow({})
-  }
-
-  const [filter, setFilter] = useState<{
-    type: { eq: string }
-    content: { contains: string }
-  }>({
-    type: { eq: query.params?.filter?.type?.eq ?? '' },
-    content: { contains: query.params?.filter?.content?.contains ?? '' },
-  })
-  const handleSelectType = (ev: ChangeEvent<HTMLSelectElement>) => {
-    const value = ev.target.value
-    filter.type.eq = value
-    setFilter({ ...filter })
-    query.update({ filter })
-  }
-  const handleChangeKeyword = (ev: ChangeEvent<HTMLInputElement>) => {
-    const value = ev.target.value
-    filter.content.contains = value
-    setFilter({ ...filter })
-    query.update({ filter })
   }
 
   const handleDoubleClick = (ev: MouseEvent<HTMLPreElement>) => {
@@ -107,38 +73,13 @@ export default function IndexPage() {
   const c = style()
   return (
     <div className={c.root}>
-      <h1>LOGATCH</h1>
-
-      <div>
-        <Form>
-          <Flex direction="row" gap="1rem">
-            <FlexItem>
-              <select name="type" onChange={handleSelectType}>
-                <option value="">すべて</option>
-                <option value="json">JSON</option>
-                <option value="text">TEXT</option>
-              </select>
-            </FlexItem>
-            <FlexItem>
-              <input
-                type="text"
-                name="contents"
-                defaultValue={filter.content.contains}
-                onChange={handleChangeKeyword}
-              />
-            </FlexItem>
-            <FlexItem>
-              <button type="button" onClick={handleClickClose}>
-                すべて閉じる
-              </button>
-            </FlexItem>
-            <FlexItem>
-              <button type="button" onClick={handleClickClear}>
-                ログをクリア
-              </button>
-            </FlexItem>
-          </Flex>
-        </Form>
+      <div className={c.filter}>
+        <FilterForm
+          filter={filter}
+          onChangeFilter={handleChangeFilter}
+          onClickClose={handleClickClose}
+          onClickClear={handleClickClear}
+        />
       </div>
 
       <div className={c.recordList}>
@@ -203,6 +144,7 @@ export default function IndexPage() {
 const style = sva({
   slots: [
     'root',
+    'filter',
     'recordList',
     'recordList__item',
     'record',
@@ -211,8 +153,13 @@ const style = sva({
   ],
   base: {
     root: {
+      minHeight: '100%',
+      padding: '1rem 1rem 4rem',
       fontSize: '0.8rem',
       background: '#efefef',
+    },
+    filter: {
+      margin: '0 0 1rem',
     },
     recordList: {},
     record: {
