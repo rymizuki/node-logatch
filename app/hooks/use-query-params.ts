@@ -5,7 +5,7 @@ import { useMemo } from 'react'
 export function useQueryParams<T = Record<string, unknown>>() {
   const [urlSearchParams, updateUrlSearchParams] = useSearchParams()
   const params = useMemo(() => {
-    return qs.parse('?' + urlSearchParams.toString()) as T
+    return qs.parse(urlSearchParams.toString()) as T
   }, [urlSearchParams])
 
   const update = (input: Record<string, unknown>) => {
