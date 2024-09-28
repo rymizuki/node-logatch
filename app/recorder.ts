@@ -18,6 +18,7 @@ const start = () => {
   const reader = readline.createInterface({
     input: process.stdin,
   })
+
   reader.on('line', (line) => {
     if (!args.silent) {
       console.log(line)

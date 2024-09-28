@@ -55,7 +55,7 @@ export const FilterForm = ({
           <input
             className={c.input}
             type="text"
-            name="contents"
+            name="filter.content.contains"
             defaultValue={filter.content.contains}
             onChange={handleChangeKeyword}
           />
